@@ -14,17 +14,19 @@
 
 // This is the only file where all details of CRC implementation are buried.
 
-#include "interface.h"
 
-#include "aligned_alloc.h"
-#include "crc32c_sse4.h"
-#include "generic_crc.h"
-#include "protected_crc.h"
-#include "rolling_crc.h"
+#define _BSD_SOURCE 1 //for valloc
+
+#include "interface.h"
+#include <stdlib.h>
+#include <crcutil/crc32c_sse4.h>
+#include <crcutil/generic_crc.h>
+#include <crcutil/protected_crc.h>
+#include <crcutil/rolling_crc.h>
 
 // Align all CRC tables on kAlign boundary.
 // Shall be exact power of 2.
-static size_t kAlign = 4 * 1024;
+//static size_t kAlign = 4 * 1024;
 
 using namespace crcutil;
 
@@ -59,10 +61,11 @@ template<typename CrcImplementation, typename RollingCrcImplementation>
                       const Crc &roll_start_value,
                       size_t roll_length,
                       const void **allocated_memory) {
-    void *memory = AlignedAlloc(sizeof(Self),
-                                offsetof(Self, crc_),
-                                kAlign,
-                                allocated_memory);
+    //previously used some sort of weird AlignedAlloc (not the standard aligned_alloc)
+    //that doesn't exist anywhere???
+    //
+    //aligned_alloc and and posix_memalign crashed the program, but valloc doesn't somehow.
+    void *memory = valloc(sizeof(Self));
     return new(memory) Self(poly,
                             degree,
                             canonical,
@@ -71,7 +74,7 @@ template<typename CrcImplementation, typename RollingCrcImplementation>
   }
 
   virtual void Delete() {
-    AlignedFree(this);
+    free(this);
   }
 
   void *operator new(size_t, void *p) {
