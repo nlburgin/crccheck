@@ -8,7 +8,7 @@ So, here's that program. It takes input on stdin and prints the checksum to stdo
 
 make sure the library and its headers are installed, then build & install with
 ```
-g++ -O3 -march=native -flto '/tmp/examples/usage.cc' '/tmp/examples/interface.cc' -lcrcutil
+g++ -O3 -march=native -flto 'usage.cc' 'interface.cc' -lcrcutil
 sudo mv a.out /usr/local/bin/crccheck
 ```
 
