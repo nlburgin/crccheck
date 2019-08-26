@@ -19,10 +19,10 @@
 
 #include "interface.h"
 #include <stdlib.h>
-#include <crcutil/crc32c_sse4.h>
-#include <crcutil/generic_crc.h>
-#include <crcutil/protected_crc.h>
-#include <crcutil/rolling_crc.h>
+#include "crc32c_sse4.h"
+#include "generic_crc.h"
+#include "protected_crc.h"
+#include "rolling_crc.h"
 
 // Align all CRC tables on kAlign boundary.
 // Shall be exact power of 2.
