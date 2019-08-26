@@ -6,11 +6,14 @@ There was a library called `libcrcutil` that was supposed to be pretty fast (esp
 
 So, here's that program. It takes input on stdin and prints the checksum to stdout. No command line arguments are acknowledged. If nothing else, it is fast.
 
-make sure the library and its headers are installed, then build & install with
-```
-g++ -O3 -march=native -flto 'usage.cc' 'interface.cc' -lcrcutil
+This bundles the library source, so no need to install the library or its headers. Just build & install with
+
+```bash
+g++ -static -O3 -no-pie -march=native -fno-stack-protector -flto -fpermissive *.cc
 sudo mv a.out /usr/local/bin/crccheck
 ```
+
+The `-static` flag actually makes a huge difference. It actually couldn't beat the standard `md5sum` utility until I tried it. Apparently C++ is slow at dynamic linking due to too many symbols, and this really weighs it down when the program is being invoked repeatedly in a Bash loop (which is this program's intended use case). It has no such problem when it's statically built, though.
 
 ## Disclaimer.
 This was adapted from the example code bundled in Debian/Ubuntu's `libcrcutil-doc` package. To get the program to run I had to fix the broken header include statements replace the weird non-standard `AlignedAlloc` (not to be confused with C11 `aligned_alloc`) allocator they were using, which doesn't seem to exist anywhere. It crashed when I tried to use `posix_memalign` and `aligned_alloc`, but the always-page-aligned `valloc` (which is supposed to be old and deprecated) seemed to work.
