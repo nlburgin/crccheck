@@ -18,4 +18,6 @@ The `-static` flag actually makes a huge difference. It actually couldn't beat t
 ## Disclaimer.
 This was adapted from the example code bundled in Debian/Ubuntu's `libcrcutil-doc` package. To get the program to run I had to fix the broken header include statements replace the weird non-standard `AlignedAlloc` (not to be confused with C11 `aligned_alloc`) allocator they were using, which doesn't seem to exist anywhere. It crashed when I tried to use `posix_memalign` and `aligned_alloc`, but the always-page-aligned `valloc` (which is supposed to be old and deprecated) seemed to work.
 
-This code is probably very bad and if you use it for anything reckless it might eat your baby. Caveat emptor.
+I made no effort to ensure output is compatible with any particular other CRC implementation besides itself. The algorithm is provided by a good library, but I might be using weird settings or something IDRK.
+
+This code is probably overall very bad and if you use it for anything reckless it might eat your baby. Caveat emptor.
