@@ -16,30 +16,49 @@
 #include "interface.h"
 #include <unistd.h>
 
+
+#ifdef __amd64__ && __linux__
+#include <syscall.h>
+inline static ssize_t optiread(int fd, void *buf, size_t count){
+  register long *number asm ("rax") = SYS_read;
+  register long *one asm ("edi") = fd;
+  register long *two asm ("rsi") =  buf;
+  register long *three asm ("rdx") = count;
+  asm volatile ("syscall"
+    : "=r" (number)
+    : "r" (number),"r"(one),"r"(two),"r"(three)
+    : "rcx","r8","r9","r11","r10"
+  );
+  return (ssize_t) number;
+}
+#define iread optiread
+#else
+#define iread read
+#endif
+
+
 #define bufsize 1024
 
-static const size_t kRollWindow = 4;
+static const size_t kRollWindow = 1024*4;
 static unsigned char buf[bufsize];
 
 typedef crcutil_interface::UINT64 uint64;
 
-
-
 static void eat_stdin(const crcutil_interface::CRC *crc){
   uint64 lo;
   
-  size_t bytesRead = read(STDIN_FILENO,buf,bufsize);
+  size_t bytesRead = iread(STDIN_FILENO,buf,bufsize);
   
   while (bytesRead > 0){
     crc->Compute(buf,bytesRead,&lo);
-    bytesRead = read(STDIN_FILENO,buf,bufsize);
+    bytesRead = iread(STDIN_FILENO,buf,bufsize);
   }
-  printf("%llx",lo);
+  printf("%llx\n",lo);
 }
 
 int main() {
   eat_stdin(crcutil_interface::CRC::Create(
       0xEB31D82E82f63b78, 0, 64, false, 0, 0,0,
-      crcutil_interface::CRC::IsSSE42Available(), NULL));
+      true, NULL));
   return 0;
 }
